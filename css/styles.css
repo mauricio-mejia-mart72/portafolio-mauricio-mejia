@@ -179,9 +179,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .hero__title {
   font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(3.5rem, 15vw, 13rem); line-height: .98; margin: 0;
+  font-size: clamp(3.5rem, 15vw, 13rem); line-height: 1.02; margin: 0;
   letter-spacing: -.005em; text-transform: uppercase;
 }
+/* Líneas enmascaradas: cada palabra vive en una franja con overflow oculto
+   y su inner sube desde abajo. padding/margin dan aire a la tilde sin soltar el leading. */
+.hero__line { display: block; overflow: hidden; }
+.hero__line-inner { display: block; padding-top: .12em; margin-top: -.12em; }
 .hero__tagline {
   font-size: clamp(1rem, 2vw, 1.4rem); color: var(--fg-dim);
   margin: 1.5rem 0 0; max-width: 28ch; font-weight: 300;

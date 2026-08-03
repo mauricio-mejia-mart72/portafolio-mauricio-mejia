@@ -48,7 +48,11 @@ function aplicarTextos() {
   eyebrowEl.textContent = SITE.eyebrow;
   eyebrowEl.style.display = SITE.eyebrow ? "" : "none";
 
-  $(".hero__title").innerHTML = SITE.nombre.split(" ").join("<br />");
+  // Título en líneas enmascaradas (cada palabra sube desde detrás de su línea)
+  $(".hero__title").innerHTML = SITE.nombre
+    .split(" ")
+    .map((w) => `<span class="hero__line"><span class="hero__line-inner">${w}</span></span>`)
+    .join("");
 
   const taglineEl = $(".hero__tagline");
   taglineEl.textContent = SITE.taglineHero;
@@ -296,14 +300,22 @@ function iniciarAnimaciones() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // --- Hero: entrada de textos ---
-  gsap.from("[data-hero-el]", {
-    y: 40,
-    opacity: 0,
-    duration: 1.2,
-    ease: "power3.out",
+  // --- Hero: título en líneas enmascaradas (sube desde detrás de la línea) ---
+  gsap.from(".hero__line-inner", {
+    yPercent: 115,
+    duration: 0.95,
+    ease: "power4.out",
     stagger: 0.12,
-    delay: 0.2,
+    delay: 0.15,
+  });
+  // --- Hero: eyebrow + tagline entran después ---
+  gsap.from("[data-hero-el]", {
+    y: 30,
+    opacity: 0,
+    duration: 1,
+    ease: "power3.out",
+    stagger: 0.1,
+    delay: 0.55,
   });
 
   // --- Hero: parallax del fondo ---
