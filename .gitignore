@@ -1,0 +1,13 @@
+# Sistema
+.DS_Store
+
+# Config local de Claude Code
+.claude/
+
+# Carpetas fuente / respaldos (no las usa el sitio publicado)
+img/todas/
+img/nuevas/
+sin blanco/
+
+# Node
+node_modules/
