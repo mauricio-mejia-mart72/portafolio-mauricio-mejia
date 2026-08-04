@@ -15,10 +15,6 @@ window.GALERIAS = [
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
       {
-        "src": "img/retrato/retrato-04.jpg",
-        "alt": "Fotografía de retrato — Mauricio Mejía"
-      },
-      {
         "src": "img/retrato/retrato-05.jpg",
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
@@ -28,10 +24,6 @@ window.GALERIAS = [
       },
       {
         "src": "img/retrato/retrato-07.jpg",
-        "alt": "Fotografía de retrato — Mauricio Mejía"
-      },
-      {
-        "src": "img/retrato/retrato-08.jpg",
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
       {
@@ -48,10 +40,6 @@ window.GALERIAS = [
       },
       {
         "src": "img/retrato/retrato-13.jpg",
-        "alt": "Fotografía de retrato — Mauricio Mejía"
-      },
-      {
-        "src": "img/retrato/retrato-14.jpg",
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
       {
