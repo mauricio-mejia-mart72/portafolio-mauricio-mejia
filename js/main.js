@@ -292,6 +292,20 @@ function iniciarReveals() {
   els.forEach((el) => io.observe(el));
 }
 
+// Entrada del hero: fija el estado oculto (antes del primer pintado) y lo revela.
+// Se llama directo en init (sin rAF) para que NO haya flash del título.
+function animarHeroEntrada() {
+  if (prefiereMenosMovimiento || !window.gsap) return;
+  gsap.set(".hero__line-inner", { yPercent: 120 });
+  gsap.set("[data-hero-el]", { opacity: 0, y: 30 });
+  gsap.to(".hero__line-inner", {
+    yPercent: 0, duration: 1.0, ease: "power4.out", stagger: 0.13, delay: 0.25,
+  });
+  gsap.to("[data-hero-el]", {
+    opacity: 1, y: 0, duration: 1, ease: "power3.out", stagger: 0.1, delay: 0.65,
+  });
+}
+
 function iniciarAnimaciones() {
   if (prefiereMenosMovimiento || !window.gsap) {
     mostrarTodoSinAnimacion();
@@ -300,23 +314,9 @@ function iniciarAnimaciones() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // --- Hero: título en líneas enmascaradas (sube desde detrás de la línea) ---
-  gsap.from(".hero__line-inner", {
-    yPercent: 115,
-    duration: 0.95,
-    ease: "power4.out",
-    stagger: 0.12,
-    delay: 0.15,
-  });
-  // --- Hero: eyebrow + tagline entran después ---
-  gsap.from("[data-hero-el]", {
-    y: 30,
-    opacity: 0,
-    duration: 1,
-    ease: "power3.out",
-    stagger: 0.1,
-    delay: 0.55,
-  });
+  // (La entrada del hero vive en animarHeroEntrada(), llamada en init SIN el
+  //  retardo de rAF, para fijar el estado inicial antes del primer pintado
+  //  y evitar el "flash" del título antes de ocultarse.)
 
   // --- Hero: parallax del fondo ---
   gsap.to("[data-hero-bg]", {
@@ -590,6 +590,7 @@ function iniciarScrollNav() {
 
 function init() {
   aplicarTextos();
+  animarHeroEntrada(); // fija/oculta el hero antes del primer pintado (sin flash)
   construirMenu();
   construirGalerias();
 
