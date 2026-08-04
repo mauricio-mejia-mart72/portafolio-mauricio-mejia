@@ -15,6 +15,10 @@ window.GALERIAS = [
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
       {
+        "src": "img/retrato/retrato-03.jpg",
+        "alt": "Fotografía de retrato — Mauricio Mejía"
+      },
+      {
         "src": "img/retrato/retrato-04.jpg",
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
@@ -32,10 +36,6 @@ window.GALERIAS = [
       },
       {
         "src": "img/retrato/retrato-08.jpg",
-        "alt": "Fotografía de retrato — Mauricio Mejía"
-      },
-      {
-        "src": "img/retrato/retrato-09.jpg",
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
       {
