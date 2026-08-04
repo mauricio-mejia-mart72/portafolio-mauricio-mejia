@@ -476,23 +476,26 @@ function iniciarLightbox() {
     if (fade && puedeFlip) gsap.fromTo(img, { autoAlpha: 0.15 }, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
   };
 
-  // Transición FLIP: la imagen del lightbox parte del rectángulo de la
-  // miniatura (First) y se anima hasta su posición final (Last).
+  // Transición FLIP: la imagen del lightbox parte de la posición/tamaño de
+  // la miniatura (First) y se anima hasta su posición final (Last).
+  // Escala UNIFORME (un solo factor) para no distorsionar la imagen: la
+  // miniatura está recortada (cover) y el lightbox va completo (contain),
+  // así que sus aspect ratios difieren; escalar sx/sy por separado la
+  // estiraría. Usamos el factor que cubre la miniatura.
   const flip = (thumb, opts) => {
     const rL = img.getBoundingClientRect();          // destino (centrado)
     const rF = thumb.getBoundingClientRect();        // origen (miniatura)
     if (!rL.width || !rF.width) return null;
-    const sx = rF.width / rL.width;
-    const sy = rF.height / rL.height;
+    const s = Math.max(rF.width / rL.width, rF.height / rL.height);
     const dx = (rF.left + rF.width / 2) - (rL.left + rL.width / 2);
     const dy = (rF.top + rF.height / 2) - (rL.top + rL.height / 2);
-    const desde = { x: dx, y: dy, scaleX: sx, scaleY: sy };
-    const hasta = { x: 0, y: 0, scaleX: 1, scaleY: 1 };
+    const desde = { x: dx, y: dy, scale: s };
+    const hasta = { x: 0, y: 0, scale: 1 };
     if (opts.abrir) {
       gsap.set(img, { ...desde, transformOrigin: "center center", autoAlpha: 1 });
-      return gsap.to(img, { ...hasta, duration: 0.62, ease: "power3.inOut", onComplete: opts.onDone });
+      return gsap.to(img, { ...hasta, duration: 0.6, ease: "power3.out", onComplete: opts.onDone });
     }
-    return gsap.to(img, { ...desde, duration: 0.5, ease: "power3.inOut", onComplete: opts.onDone });
+    return gsap.to(img, { ...desde, duration: 0.45, ease: "power3.in", onComplete: opts.onDone });
   };
 
   const abrir = (i) => {
