@@ -11,3 +11,6 @@ sin blanco/
 
 # Node
 node_modules/
+
+# Artefactos de Playwright MCP
+.playwright-mcp/

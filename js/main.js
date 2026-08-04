@@ -181,6 +181,7 @@ function construirGalerias() {
         return `
             <figure class="gallery__item" data-reveal data-index="${index}">
               <img class="gallery__img" src="${foto.src}" alt="${foto.alt || ""}"
+                   ${foto.foco ? `style="object-position:${foto.foco}"` : ""}
                    loading="lazy" decoding="async" />
               <figcaption class="gallery__caption"><span class="gallery__caption-num">${codigo}</span>${pie}</figcaption>
             </figure>`;
@@ -453,30 +454,89 @@ function iniciarScrollSuave() {
 
 function iniciarLightbox() {
   const lb = $("#lightbox");
+  const backdrop = $("#lightboxBackdrop");
   const img = $("#lightboxImg");
   const cap = $("#lightboxCaption");
+  const ctrls = [$("#lightboxClose"), $("#lightboxPrev"), $("#lightboxNext"), cap];
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const puedeFlip = !!window.gsap && !reduce;
   let actual = 0;
+  let animando = false;
 
-  const mostrar = (i) => {
+  const thumbDe = (i) =>
+    document.querySelector(`.gallery__item[data-index="${i}"] .gallery__img`);
+
+  const mostrar = (i, fade) => {
     actual = (i + galleryFlat.length) % galleryFlat.length;
     const f = galleryFlat[actual];
     img.src = f.src;
     img.alt = f.alt || "";
     const etiqueta = f.titulo ? `${f.titulo} · ${f.categoria}` : f.categoria;
     cap.textContent = `${etiqueta} — ${actual + 1}/${galleryFlat.length}`;
+    if (fade && puedeFlip) gsap.fromTo(img, { autoAlpha: 0.15 }, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
   };
+
+  // Transición FLIP: la imagen del lightbox parte del rectángulo de la
+  // miniatura (First) y se anima hasta su posición final (Last).
+  const flip = (thumb, opts) => {
+    const rL = img.getBoundingClientRect();          // destino (centrado)
+    const rF = thumb.getBoundingClientRect();        // origen (miniatura)
+    if (!rL.width || !rF.width) return null;
+    const sx = rF.width / rL.width;
+    const sy = rF.height / rL.height;
+    const dx = (rF.left + rF.width / 2) - (rL.left + rL.width / 2);
+    const dy = (rF.top + rF.height / 2) - (rL.top + rL.height / 2);
+    const desde = { x: dx, y: dy, scaleX: sx, scaleY: sy };
+    const hasta = { x: 0, y: 0, scaleX: 1, scaleY: 1 };
+    if (opts.abrir) {
+      gsap.set(img, { ...desde, transformOrigin: "center center", autoAlpha: 1 });
+      return gsap.to(img, { ...hasta, duration: 0.62, ease: "power3.inOut", onComplete: opts.onDone });
+    }
+    return gsap.to(img, { ...desde, duration: 0.5, ease: "power3.inOut", onComplete: opts.onDone });
+  };
+
   const abrir = (i) => {
+    if (animando) return;
     mostrar(i);
     lb.classList.add("is-open");
     lb.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     if (lenis) lenis.stop();
+    if (!puedeFlip) return;
+
+    lb.classList.add("is-flip");
+    animando = true;
+    const run = () => {
+      gsap.fromTo(backdrop, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
+      gsap.fromTo(ctrls, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, delay: 0.28 });
+      const thumb = thumbDe(actual);
+      const tw = thumb && flip(thumb, { abrir: true, onDone: () => { animando = false; } });
+      if (!tw) { gsap.set(img, { autoAlpha: 1 }); animando = false; }
+    };
+    if (img.complete && img.naturalWidth) requestAnimationFrame(run);
+    else img.addEventListener("load", () => requestAnimationFrame(run), { once: true });
   };
-  const cerrar = () => {
-    lb.classList.remove("is-open");
+
+  const finalizarCierre = () => {
+    lb.classList.remove("is-open", "is-flip");
     lb.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+    if (window.gsap) gsap.set(img, { clearProps: "all" });
     if (lenis) lenis.start();
+    animando = false;
+  };
+
+  const cerrar = () => {
+    if (animando) return;
+    if (!puedeFlip) { finalizarCierre(); return; }
+    animando = true;
+    gsap.to(backdrop, { autoAlpha: 0, duration: 0.4, ease: "power2.in" });
+    gsap.to(ctrls, { autoAlpha: 0, duration: 0.2 });
+    const thumb = thumbDe(actual);
+    const rF = thumb && thumb.getBoundingClientRect();
+    const visible = rF && rF.bottom > 0 && rF.top < window.innerHeight;
+    if (visible && flip(thumb, { abrir: false, onDone: finalizarCierre })) return;
+    gsap.to(img, { autoAlpha: 0, duration: 0.3, onComplete: finalizarCierre });
   };
 
   $("#galerias").addEventListener("click", (e) => {
@@ -484,14 +544,14 @@ function iniciarLightbox() {
     if (item) abrir(Number(item.dataset.index));
   });
   $("#lightboxClose").addEventListener("click", cerrar);
-  $("#lightboxPrev").addEventListener("click", () => mostrar(actual - 1));
-  $("#lightboxNext").addEventListener("click", () => mostrar(actual + 1));
-  lb.addEventListener("click", (e) => { if (e.target === lb) cerrar(); });
+  $("#lightboxPrev").addEventListener("click", () => { if (!animando) mostrar(actual - 1, true); });
+  $("#lightboxNext").addEventListener("click", () => { if (!animando) mostrar(actual + 1, true); });
+  backdrop.addEventListener("click", cerrar);
   document.addEventListener("keydown", (e) => {
     if (!lb.classList.contains("is-open")) return;
     if (e.key === "Escape") cerrar();
-    if (e.key === "ArrowLeft") mostrar(actual - 1);
-    if (e.key === "ArrowRight") mostrar(actual + 1);
+    if (e.key === "ArrowLeft" && !animando) mostrar(actual - 1, true);
+    if (e.key === "ArrowRight" && !animando) mostrar(actual + 1, true);
   });
 }
 

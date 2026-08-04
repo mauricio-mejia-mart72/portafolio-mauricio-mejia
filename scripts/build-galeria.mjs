@@ -23,6 +23,12 @@ const CAPTIONS = {
   "calle-01.jpg": "Observadora en Silencio",
 };
 
+// Punto focal (object-position) para fotos que el grid recorta mal.
+// Clave = nombre de archivo · Valor = "x% y%" (dónde está el sujeto).
+const FOCOS = {
+  "paisaje-13.jpg": "50% 68%", // la barca está en la mitad baja
+};
+
 const cats = META.map((m) => {
   const files = readdirSync(join(imgDir, m.id))
     .filter((f) => /\.jpe?g$/i.test(f))
@@ -33,6 +39,7 @@ const cats = META.map((m) => {
       alt: CAPTIONS[f] || `Fotografía de ${m.titulo.toLowerCase()} — Mauricio Mejía`,
     };
     if (CAPTIONS[f]) foto.titulo = CAPTIONS[f];
+    if (FOCOS[f]) foto.foco = FOCOS[f];
     return foto;
   });
   return { id: m.id, titulo: m.titulo, desc: m.desc, fotos };

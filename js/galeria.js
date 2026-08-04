@@ -251,7 +251,8 @@ window.GALERIAS = [
       },
       {
         "src": "img/paisaje/paisaje-13.jpg",
-        "alt": "Fotografía de paisaje — Mauricio Mejía"
+        "alt": "Fotografía de paisaje — Mauricio Mejía",
+        "foco": "50% 68%"
       },
       {
         "src": "img/paisaje/paisaje-14.jpg",
