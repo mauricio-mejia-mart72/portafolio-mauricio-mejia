@@ -250,10 +250,6 @@ window.GALERIAS = [
         "alt": "Fotografía de paisaje — Mauricio Mejía"
       },
       {
-        "src": "img/paisaje/paisaje-12.jpg",
-        "alt": "Fotografía de paisaje — Mauricio Mejía"
-      },
-      {
         "src": "img/paisaje/paisaje-13.jpg",
         "alt": "Fotografía de paisaje — Mauricio Mejía"
       },
