@@ -15,10 +15,6 @@ window.GALERIAS = [
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
       {
-        "src": "img/retrato/retrato-03.jpg",
-        "alt": "Fotografía de retrato — Mauricio Mejía"
-      },
-      {
         "src": "img/retrato/retrato-04.jpg",
         "alt": "Fotografía de retrato — Mauricio Mejía"
       },
