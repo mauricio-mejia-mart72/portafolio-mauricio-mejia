@@ -130,8 +130,8 @@ function renderCita(cita, code, i) {
   const lado = i % 2 === 0 ? "statement--left" : "statement--right";
   return `
     <section class="statement ${lado}">
-      <blockquote class="statement__quote" data-reveal>${cita.texto}</blockquote>
-      <div class="statement__meta" data-reveal>
+      <blockquote class="statement__quote">${cita.texto}</blockquote>
+      <div class="statement__meta">
         <span class="statement__author">${cita.autor}</span>
         ${cita.orig ? `<span class="statement__orig">“${cita.orig}”</span>` : ""}
       </div>
@@ -307,6 +307,85 @@ function animarHeroEntrada() {
   });
 }
 
+// Parte una cita en líneas reales (según el ancho actual) y envuelve cada
+// línea en una máscara (overflow:hidden) con un inner desplazable. Devuelve
+// los inners para animarlos. El corte por línea se hace midiendo offsetTop
+// tras el layout, así que debe llamarse con la fuente ya cargada.
+function partirEnLineas(el, textoPlano) {
+  el.textContent = "";
+  const palabras = textoPlano.split(/\s+/).filter(Boolean);
+  const spans = palabras.map((p) => {
+    const s = document.createElement("span");
+    s.className = "cita-w";
+    s.textContent = p;
+    el.appendChild(s);
+    el.appendChild(document.createTextNode(" "));
+    return s;
+  });
+  // Agrupar por línea según la posición vertical resultante.
+  const lineas = [];
+  let top = null;
+  spans.forEach((s) => {
+    const t = s.offsetTop;
+    if (top === null || Math.abs(t - top) > 4) { lineas.push([]); top = t; }
+    lineas[lineas.length - 1].push(s.textContent);
+  });
+  // Reconstruir con máscaras por línea.
+  el.textContent = "";
+  const inners = [];
+  lineas.forEach((palabrasLinea) => {
+    const line = document.createElement("span");
+    line.className = "cita-line";
+    const inner = document.createElement("span");
+    inner.className = "cita-line-inner";
+    inner.textContent = palabrasLinea.join(" ");
+    line.appendChild(inner);
+    el.appendChild(line);
+    inners.push(inner);
+  });
+  return inners;
+}
+
+// Citas de categoría: se "arman" con el scroll (máscara por línea + scrub).
+// El autor y la traducción entran un beat después, al final del recorrido.
+function iniciarCitasScroll() {
+  if (prefiereMenosMovimiento || !window.gsap || !window.ScrollTrigger) return;
+  const quotes = $$(".statement__quote");
+  if (!quotes.length) return;
+
+  let triggers = [];
+  const construir = () => {
+    triggers.forEach((t) => t && t.kill());
+    triggers = [];
+    quotes.forEach((q) => {
+      if (!q.dataset.raw) q.dataset.raw = q.textContent.trim();
+      const inners = partirEnLineas(q, q.dataset.raw);
+      const section = q.closest(".statement");
+      const meta = section && section.querySelector(".statement__meta");
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: q, start: "top 88%", end: "top 42%", scrub: 0.6 },
+      });
+      tl.from(inners, { yPercent: 118, duration: 1, ease: "power4.out", stagger: 0.5 });
+      if (meta) tl.from(meta, { autoAlpha: 0, y: 22, duration: 0.7, ease: "power2.out" }, "-=0.2");
+      triggers.push(tl.scrollTrigger);
+    });
+    ScrollTrigger.refresh();
+  };
+
+  // Cortar líneas con la fuente ya cargada (Anton llega tarde y cambia el wrap).
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(construir);
+  else construir();
+
+  // Rehacer si cambia el ancho (el corte de líneas depende del ancho).
+  let w = window.innerWidth, tid;
+  window.addEventListener("resize", () => {
+    if (Math.abs(window.innerWidth - w) < 40) return;
+    w = window.innerWidth;
+    clearTimeout(tid);
+    tid = setTimeout(construir, 200);
+  }, { passive: true });
+}
+
 function iniciarAnimaciones() {
   if (prefiereMenosMovimiento || !window.gsap) {
     mostrarTodoSinAnimacion();
@@ -353,6 +432,9 @@ function iniciarAnimaciones() {
       }
     );
   });
+
+  // Citas de categoría que se arman con el scroll.
+  iniciarCitasScroll();
 
   // Recalcular posiciones cuando fuentes e imágenes terminen de cargar.
   // (Anton y las fotos cargan tarde y cambian la altura del layout, lo que
