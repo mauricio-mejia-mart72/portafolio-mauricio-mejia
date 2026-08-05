@@ -344,7 +344,14 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .statement--right .statement__quote { margin-left: auto; }
 /* Máscara por línea para el "armado" con scroll (headroom evita cortar acentos) */
 .cita-line { display: block; overflow: hidden; padding-top: .12em; margin-top: -.12em; }
-.cita-line-inner { display: block; will-change: transform; }
+.cita-line-inner { display: block; filter: blur(0px); will-change: transform, filter; }
+/* Hairline dorada que se traza cuando la cita termina de armarse */
+.statement__rule {
+  display: block; width: clamp(3rem, 8vw, 7rem); height: 2px;
+  margin-top: clamp(1.6rem, 4vw, 2.6rem); background: var(--accent);
+  transform-origin: left center;
+}
+.statement--right .statement__rule { margin-left: auto; transform-origin: right center; }
 .statement__meta {
   margin-top: clamp(1.5rem, 4vw, 3rem);
   display: flex; flex-direction: column; gap: .55rem;

@@ -131,6 +131,7 @@ function renderCita(cita, code, i) {
   return `
     <section class="statement ${lado}">
       <blockquote class="statement__quote">${cita.texto}</blockquote>
+      <span class="statement__rule" aria-hidden="true"></span>
       <div class="statement__meta">
         <span class="statement__author">${cita.autor}</span>
         ${cita.orig ? `<span class="statement__orig">“${cita.orig}”</span>` : ""}
@@ -361,12 +362,20 @@ function iniciarCitasScroll() {
       if (!q.dataset.raw) q.dataset.raw = q.textContent.trim();
       const inners = partirEnLineas(q, q.dataset.raw);
       const section = q.closest(".statement");
+      const rule = section && section.querySelector(".statement__rule");
       const meta = section && section.querySelector(".statement__meta");
       const tl = gsap.timeline({
         scrollTrigger: { trigger: q, start: "top 88%", end: "top 42%", scrub: 0.6 },
       });
-      tl.from(inners, { yPercent: 118, duration: 1, ease: "power4.out", stagger: 0.5 });
-      if (meta) tl.from(meta, { autoAlpha: 0, y: 22, duration: 0.7, ease: "power2.out" }, "-=0.2");
+      // Cada línea sube desde la máscara con un leve skew que se endereza y
+      // un blur que enfoca — sensación de "peso" cinematográfico.
+      tl.from(inners, {
+        yPercent: 118, skewY: 4, filter: "blur(12px)",
+        duration: 1, ease: "power4.out", stagger: 0.5,
+      });
+      // La hairline dorada se traza al terminar de armarse la frase.
+      if (rule) tl.from(rule, { scaleX: 0, duration: 0.6, ease: "power3.inOut" }, "-=0.3");
+      if (meta) tl.from(meta, { autoAlpha: 0, y: 22, duration: 0.7, ease: "power2.out" }, "-=0.35");
       triggers.push(tl.scrollTrigger);
     });
     ScrollTrigger.refresh();
