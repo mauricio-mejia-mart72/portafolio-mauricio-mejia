@@ -381,9 +381,13 @@ function iniciarCitasScroll() {
     ScrollTrigger.refresh();
   };
 
-  // Cortar líneas con la fuente ya cargada (Anton llega tarde y cambia el wrap).
+  // Armar YA (no depender de la carga de fuentes: document.fonts.ready puede
+  // tardar o colgarse en algunos navegadores, y entonces el texto quedaría
+  // plano y estático). Luego se re-corta cuando Anton cargue para afinar el
+  // wrap, y al 'load' por si acaso.
+  construir();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(construir);
-  else construir();
+  window.addEventListener("load", construir, { once: true });
 
   // Rehacer si cambia el ancho (el corte de líneas depende del ancho).
   let w = window.innerWidth, tid;
